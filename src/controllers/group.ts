@@ -73,6 +73,29 @@ export const saveChatToGroup = async (req:any, res:any)=>{
     }
 }
 
+export const getGroupChat = async (req:any, res:any)=>{
+    const GROUP_ID = req.params.GROUP_ID;
+    if(!GROUP_ID) return errorResponse(res, 422, 'GROUP_ID is required!')
+    try{
+        const GROUP_DATA = await groupModule.getGroup({ _id: GROUP_ID });
+        if(!GROUP_DATA) return errorResponse(res, 422, 'group id is invalid!')
+        const isEXIST = await isUserExistInGroup(GROUP_ID, USER_DATA.Groups);
+        if(!isEXIST){
+            return errorResponse(res, 422, 'you are not member of this group');
+        }else{
+            const data ={
+                from: req.user._id,
+                to: GROUP_ID,
+                text: MESSAGE 
+            }
+            await messageModule.saveChat(data)
+            return succesResponse(res, 200, 'message sand to group successfully!')
+        }
+    }catch(error){
+        return errorResponse(res, 422, error)
+    }
+}
+
 async function isAdminExist(ID:any, ADMINS:any){
     for(let i=0; i < ADMINS.length; i++){
         if(ID == ADMINS[i].ADMIN_ID){
